@@ -43,14 +43,25 @@ handleEvent wenv _node model evt =
              in [Model (set currentCountdown tdText model)]
         AppStartWorkTime ->
             let ws = view workInterval model
-                curWaitState = view currentState model
-             in if curWaitState == NoWait
-                    then Producer (waitSetup ws WorkWait AppStartRestTimer) : updateCounterReq wenv
-                    else []
+                effect =
+                    stopCounterReq wenv
+                        ++ updateCounterReq wenv
+                        ++ [Producer (waitSetup ws WorkWait AppStartRestTimer)]
+             in case view currentState model of
+                    WorkWait _ -> []
+                    RestWait _ -> effect
+                    NoWait -> effect
         AppStartRestTimer ->
             let ws = view restInterval model
-             in Producer (waitSetup ws RestWait AppStartWorkTime) : stopCounterReq wenv
-        AppStopTimer -> stopTimerSetup model
+                effect =
+                    stopCounterReq wenv
+                        ++ updateCounterReq wenv
+                        ++ [Producer (waitSetup ws RestWait AppStartWorkTime)]
+             in case view currentState model of
+                    RestWait _ -> error "Should be impossible."
+                    NoWait -> []
+                    WorkWait _ -> effect
+        AppStopTimer -> stopTimerSetup model ++ stopCounterReq wenv
 
 mainCounter :: Text
 mainCounter = "MainCounter"
