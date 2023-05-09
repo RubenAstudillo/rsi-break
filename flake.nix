@@ -12,13 +12,15 @@
       });
     in
     {
-      overlay = (final: prev: {
+      overlay = (final: prev: rec {
         rsi-break = final.haskellPackages.callPackage (import ./default.nix) {};
+        rsi-break-clean = with final.haskell.lib; dontCheck (justStaticExecutables rsi-break);
       });
       packages = forAllSystems (system: {
          rsi-break = nixpkgsFor.${system}.rsi-break;
+         rsi-break-clean = nixpkgsFor.${system}.rsi-break-clean;
       });
-      defaultPackage = forAllSystems (system: self.packages.${system}.rsi-break);
+      defaultPackage = forAllSystems (system: self.packages.${system}.rsi-break-clean);
       checks = self.packages;
       devShell = forAllSystems (system: let haskellPackages = nixpkgsFor.${system}.haskellPackages;
         in haskellPackages.shellFor {

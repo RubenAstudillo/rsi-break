@@ -11,7 +11,18 @@ maintainer:         ruben.astud@gmail.com
 category:           Graphics
 build-type:         Simple
 extra-doc-files:    CHANGELOG.md
-data-files:         assets/**
+data-files: assets/sound/bell.wav
+            assets/sound/bell.mp3
+            assets/images/red-button.png
+            assets/images/red-button-hover.png
+            assets/images/monomer-logo.svg
+            assets/images/icon.png
+            assets/fonts/Roboto-Italic.ttf
+            assets/fonts/Roboto-Bold.ttf
+            assets/fonts/remixicon.ttf
+            assets/fonts/Roboto-Regular.ttf
+            assets/fonts/Roboto-Medium.ttf
+
 -- extra-source-files:
 
 common warnings
