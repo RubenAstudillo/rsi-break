@@ -11,6 +11,7 @@ maintainer:         ruben.astud@gmail.com
 category:           Graphics
 build-type:         Simple
 extra-doc-files:    CHANGELOG.md
+data-files:         assets/**
 -- extra-source-files:
 
 common warnings
@@ -21,8 +22,9 @@ library
     exposed-modules:  RsiBreak.Controller
                       RsiBreak.Model
                       RsiBreak.View
+                      RsiBreak.Sound
                       RsiBreak.RealMain
-    -- other-modules:
+    other-modules:    Paths_rsi_break
     -- other-extensions:
     build-depends:    base ^>=4.16.4.0,
                       monomer,
@@ -30,7 +32,8 @@ library
                       text,
                       text-show,
                       async,
-                      time
+                      time,
+                      process
     hs-source-dirs:   src
     default-language: Haskell2010
 

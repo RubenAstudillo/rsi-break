@@ -1,5 +1,5 @@
-{ mkDerivation, async, base, lens, lib, monomer, SDL, SDL-mixer
-, text, text-show, time
+{ mkDerivation, async, base, lens, lib, monomer, process, text
+, text-show, time
 }:
 mkDerivation {
   pname = "rsi-break";
@@ -8,7 +8,7 @@ mkDerivation {
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [
-    async base lens monomer SDL SDL-mixer text text-show time
+    async base lens monomer process text text-show time
   ];
   executableHaskellDepends = [ base ];
   testHaskellDepends = [ base ];
