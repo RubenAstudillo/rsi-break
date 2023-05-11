@@ -17,7 +17,7 @@ import Data.Time.Clock (NominalDiffTime, diffUTCTime, getCurrentTime)
 import Monomer
 import RsiBreak.Model
 import RsiBreak.Sound (dingBell)
-import System.Process (waitForProcess)
+import System.Process
 
 data AppEvent
     = AppNewWorkTime Minutes
@@ -97,7 +97,10 @@ waitSetup totalTimeMin waitStateWrap thenEv handler = do
                 handler (AppUpdateCountDown 0)
     handler (AppUpdateWaitState (waitStateWrap waitThr))
     res <- waitCatch waitThr
-    when (isRight res) (handler thenEv)
+    when (isRight res) $
+        do
+            _ <- runInteractiveProcess "rsi-break-popup" [] Nothing Nothing
+            handler thenEv
 
 stopTimerSetup :: AppModel -> [AppEventResponse AppModel AppEvent]
 stopTimerSetup model =

@@ -60,6 +60,18 @@ executable rsi-break
     hs-source-dirs:   app
     default-language: Haskell2010
 
+executable rsi-break-popup
+    import:           warnings
+    main-is:          Main.hs
+    ghc-options:      -threaded -rtsopts=all -with-rtsopts=-N2
+    other-modules:    Paths_rsi_break
+    -- other-extensions:
+    build-depends:
+        base ^>=4.16.4.0,
+        monomer
+    hs-source-dirs:   popup
+    default-language: Haskell2010
+
 test-suite rsi-break-test
     import:           warnings
     default-language: Haskell2010
