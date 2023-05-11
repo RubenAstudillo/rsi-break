@@ -1,3 +1,4 @@
+{-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Main where
@@ -14,11 +15,14 @@ main = do
     startApp () (\_ _ _ _ -> []) buildUI cfg
   where
     config icon' roboto =
-        [ appWindowTitle "Tutorial 01 - Basics"
+        [ appWindowTitle "Rest now"
         , appWindowIcon icon'
         , appTheme darkTheme
         , appFontDef "Regular" roboto
         ]
 
 buildUI :: WidgetEnv () () -> () -> WidgetNode () ()
-buildUI _wenv _model = box_ [alignCenter] (label "Resting time!")
+buildUI _wenv _model =
+    box_ [alignCenter]
+        . animFadeIn_ [autoStart, duration 4_000]
+        $ label "Resting time!" `styleBasic` [textSize 80.0]

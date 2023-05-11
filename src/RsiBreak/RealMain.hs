@@ -17,7 +17,7 @@ realMain = do
     startApp model handleEvent buildUI cfg
   where
     config icon' roboto =
-        [ appWindowTitle "Tutorial 01 - Basics"
+        [ appWindowTitle "RSI Break"
         , appWindowIcon icon'
         , appTheme darkTheme
         , appFontDef "Regular" roboto
