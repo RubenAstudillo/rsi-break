@@ -5,8 +5,9 @@ module RsiBreak.Controller where
 
 import Control.Concurrent (threadDelay)
 import Control.Concurrent.Async
+import Control.Exception (finally)
 import Control.Lens
-import Control.Monad (when)
+import Control.Monad (void, when)
 import Data.Either (isRight)
 import Data.Function (fix)
 import Data.Maybe (maybeToList)
@@ -18,6 +19,7 @@ import Monomer
 import RsiBreak.Model
 import RsiBreak.Sound (dingBell)
 import System.Process
+import System.Timeout (timeout)
 
 data AppEvent
     = AppNewWorkTime Minutes
@@ -58,7 +60,9 @@ handleEvent wenv _node model evt =
                 effect =
                     stopCounterReq wenv
                         ++ updateCounterReq wenv
-                        ++ [Producer (waitSetup ws RestWait AppStartWorkTime)]
+                        ++ [ Producer (const popWin)
+                           , Producer (waitSetup ws RestWait AppStartWorkTime)
+                           ]
              in case view currentState model of
                     RestWait _ -> error "Should be impossible."
                     NoWait -> []
@@ -97,10 +101,12 @@ waitSetup totalTimeMin waitStateWrap thenEv handler = do
                 handler (AppUpdateCountDown 0)
     handler (AppUpdateWaitState (waitStateWrap waitThr))
     res <- waitCatch waitThr
-    when (isRight res) $
-        do
-            _ <- runInteractiveProcess "rsi-break-popup" [] Nothing Nothing
-            handler thenEv
+    when (isRight res) (handler thenEv)
+
+popWin :: IO ()
+popWin = do
+    (_, _, _, than) <- runInteractiveProcess "rsi-break-popup" [] Nothing Nothing
+    void $ timeout 5_000_000 (waitForProcess than) `finally` terminateProcess than
 
 stopTimerSetup :: AppModel -> [AppEventResponse AppModel AppEvent]
 stopTimerSetup model =
