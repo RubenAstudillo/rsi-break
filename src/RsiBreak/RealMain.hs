@@ -22,4 +22,4 @@ realMain = do
         , appTheme darkTheme
         , appFontDef "Regular" roboto
         ]
-    model = AppModel 5 1 "0:00" NoWait
+    model = AppModel 30 5 "0:00" NoWait
