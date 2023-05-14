@@ -8,6 +8,7 @@ import Paths_rsi_break
 import RsiBreak.Controller
 import RsiBreak.Model
 import RsiBreak.View
+import qualified RsiBreak.Settings as Settings
 
 realMain :: IO ()
 realMain = do
@@ -22,4 +23,4 @@ realMain = do
         , appTheme darkTheme
         , appFontDef "Regular" roboto
         ]
-    model = AppModel 30 5 "0:00" NoWait
+    model = AppModel (Settings.TimerSetting 30 5) "0:00" NoWait

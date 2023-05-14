@@ -6,6 +6,7 @@ import Control.Lens (view)
 import Monomer
 import RsiBreak.Controller
 import RsiBreak.Model
+import qualified RsiBreak.Settings as Settings
 
 greenBgStyle, blueBgStyle :: StyleState
 greenBgStyle = mempty{_sstBgColor = Just (Color 0 128 0 1)}
@@ -20,14 +21,7 @@ buildUI _wenv model =
         [ label "Rsi Break!"
         , textField_ currentCountdown [readOnly] `nodeKey` mainCounter `styleBasic` currentCountdownColor
         , spacer
-        , hstack
-            [ label "Work time: "
-            , numericField_ workInterval [minValue 0, maxValue 300, onChange AppNewWorkTime]
-            ]
-        , hstack
-            [ label "Rest time: "
-            , numericField_ restInterval [minValue 0, maxValue 300, onChange AppNewRestTime]
-            ]
+        , composite "settings-param" timerSettings Settings.buildUI Settings.handleEvent
         , spacer
         , button "Start" AppStartWorkTime
         , button "Stop" AppStopTimer

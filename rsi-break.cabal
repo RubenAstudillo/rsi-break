@@ -35,6 +35,7 @@ library
                       RsiBreak.View
                       RsiBreak.Sound
                       RsiBreak.RealMain
+                      RsiBreak.Settings
     other-modules:    Paths_rsi_break
     -- other-extensions:
     build-depends:    base ^>=4.16.4.0,

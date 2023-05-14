@@ -20,11 +20,10 @@ import RsiBreak.Model
 import RsiBreak.Sound (dingBell)
 import System.Process
 import System.Timeout (timeout)
+import qualified RsiBreak.Settings as Settings
 
 data AppEvent
-    = AppNewWorkTime Minutes
-    | AppNewRestTime Minutes
-    | AppStartWorkTime
+    = AppStartWorkTime
     | AppUpdateCountDown NominalDiffTime
     | AppStartRestTimer
     | AppUpdateWaitState WaitState
@@ -38,15 +37,13 @@ handleEvent ::
     [AppEventResponse AppModel AppEvent]
 handleEvent wenv _node model evt =
     case evt of
-        AppNewWorkTime newS -> [Model (set workInterval newS model)]
-        AppNewRestTime newS -> [Model (set restInterval newS model)]
         AppUpdateWaitState wstate ->
             [Model (set currentState wstate model)]
         AppUpdateCountDown td ->
             let tdText = fromString (formatTime defaultTimeLocale "%m:%02S" td)
              in [Model (set currentCountdown tdText model)]
         AppStartWorkTime ->
-            let ws = view workInterval model
+            let ws = view (timerSettings . Settings.workInterval) model
                 effect =
                     stopCounterReq wenv
                         ++ updateCounterReq wenv
@@ -56,7 +53,7 @@ handleEvent wenv _node model evt =
                     RestWait _ -> effect
                     NoWait -> effect
         AppStartRestTimer ->
-            let ws = view restInterval model
+            let ws = view (timerSettings . Settings.restInterval) model
                 effect =
                     stopCounterReq wenv
                         ++ updateCounterReq wenv
