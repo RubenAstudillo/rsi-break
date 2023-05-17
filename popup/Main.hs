@@ -6,13 +6,15 @@ module Main where
 import Data.String (IsString (..))
 import Monomer
 import Paths_rsi_break
+import System.Timeout (timeout)
+import Data.Functor (void)
 
 main :: IO ()
 main = do
     windowIconPath <- fromString <$> getDataFileName "assets/images/icon.png"
     robotoRegularFont <- fromString <$> getDataFileName "assets/fonts/Roboto-Regular.ttf"
     let cfg = config windowIconPath robotoRegularFont
-    startApp () (\_ _ _ _ -> []) buildUI cfg
+    void . timeout 5_000_000 $ startApp () (\_ _ _ _ -> []) buildUI cfg
   where
     config icon' roboto =
         [ appWindowTitle "Rest now"
