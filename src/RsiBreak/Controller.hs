@@ -16,9 +16,9 @@ import Data.Time (defaultTimeLocale, formatTime)
 import Data.Time.Clock (NominalDiffTime, diffUTCTime, getCurrentTime)
 import Monomer
 import RsiBreak.Model
+import qualified RsiBreak.Settings as Settings
 import RsiBreak.Sound (dingBell)
 import System.Process
-import qualified RsiBreak.Settings as Settings
 
 data AppEvent
     = AppStartWorkTime
@@ -45,7 +45,9 @@ handleEvent wenv _node model evt =
                 effect =
                     stopCounterReq wenv
                         ++ updateCounterReq wenv
-                        ++ [Producer (waitSetup ws WorkWait AppStartRestTimer)]
+                        ++ [ (Producer . const . popWin . pure) "Working Time!"
+                           , Producer (waitSetup ws WorkWait AppStartRestTimer)
+                           ]
              in case view currentState model of
                     WorkWait _ -> []
                     RestWait _ -> effect
@@ -55,7 +57,7 @@ handleEvent wenv _node model evt =
                 effect =
                     stopCounterReq wenv
                         ++ updateCounterReq wenv
-                        ++ [ Producer (const popWin)
+                        ++ [ Producer (const (popWin Nothing))
                            , Producer (waitSetup ws RestWait AppStartWorkTime)
                            ]
              in case view currentState model of
@@ -98,9 +100,9 @@ waitSetup totalTimeMin waitStateWrap thenEv handler = do
     res <- waitCatch waitThr
     when (isRight res) (handler thenEv)
 
-popWin :: IO ()
-popWin = do
-    (_, _, _, than) <- runInteractiveProcess "rsi-break-popup" [] Nothing Nothing
+popWin :: Maybe String -> IO ()
+popWin mstr = do
+    (_, _, _, than) <- runInteractiveProcess "rsi-break-popup" (maybeToList mstr) Nothing Nothing
     void $ waitForProcess than
 
 stopTimerSetup :: AppModel -> [AppEventResponse AppModel AppEvent]

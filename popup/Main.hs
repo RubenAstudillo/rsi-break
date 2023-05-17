@@ -8,13 +8,17 @@ import Monomer
 import Paths_rsi_break
 import System.Timeout (timeout)
 import Data.Functor (void)
+import System.Environment (getArgs)
+import Data.Maybe (fromMaybe, listToMaybe)
 
 main :: IO ()
 main = do
+    args <- getArgs
+    let str = fromMaybe "Resting time!" (listToMaybe args)
     windowIconPath <- fromString <$> getDataFileName "assets/images/icon.png"
     robotoRegularFont <- fromString <$> getDataFileName "assets/fonts/Roboto-Regular.ttf"
     let cfg = config windowIconPath robotoRegularFont
-    void . timeout 5_000_000 $ startApp () (\_ _ _ _ -> []) buildUI cfg
+    void . timeout 5_000_000 $ startApp () (\_ _ _ _ -> []) (buildUI str) cfg
   where
     config icon' roboto =
         [ appWindowTitle "Rest now"
@@ -23,8 +27,8 @@ main = do
         , appFontDef "Regular" roboto
         ]
 
-buildUI :: WidgetEnv () () -> () -> WidgetNode () ()
-buildUI _wenv _model =
+buildUI :: String -> WidgetEnv () () -> () -> WidgetNode () ()
+buildUI str _wenv _model =
     box_ [alignCenter]
         . animFadeIn_ [autoStart, duration 4_000]
-        $ label "Resting time!" `styleBasic` [textSize 80.0]
+        $ label (fromString str) `styleBasic` [textSize 80.0]
