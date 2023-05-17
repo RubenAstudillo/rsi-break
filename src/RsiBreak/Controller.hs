@@ -5,7 +5,6 @@ module RsiBreak.Controller where
 
 import Control.Concurrent (threadDelay)
 import Control.Concurrent.Async
-import Control.Exception (finally)
 import Control.Lens
 import Control.Monad (void, when)
 import Data.Either (isRight)
@@ -19,7 +18,6 @@ import Monomer
 import RsiBreak.Model
 import RsiBreak.Sound (dingBell)
 import System.Process
-import System.Timeout (timeout)
 import qualified RsiBreak.Settings as Settings
 
 data AppEvent
@@ -103,7 +101,7 @@ waitSetup totalTimeMin waitStateWrap thenEv handler = do
 popWin :: IO ()
 popWin = do
     (_, _, _, than) <- runInteractiveProcess "rsi-break-popup" [] Nothing Nothing
-    void $ timeout 5_000_000 (waitForProcess than) `finally` terminateProcess than
+    void $ waitForProcess than
 
 stopTimerSetup :: AppModel -> [AppEventResponse AppModel AppEvent]
 stopTimerSetup model =
