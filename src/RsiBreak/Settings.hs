@@ -22,15 +22,16 @@ data TimerSettingEvent
     deriving (Eq, Show)
 
 handleEvent ::
+    ep ->
     WidgetEnv TimerSetting TimerSettingEvent ->
     WidgetNode TimerSetting TimerSettingEvent ->
     TimerSetting ->
     TimerSettingEvent ->
     [EventResponse TimerSetting TimerSettingEvent sp ep]
-handleEvent _wenv _node model evt =
+handleEvent ep _wenv _node model evt =
     case evt of
-        TSENewWorkTime newm -> [Model (set workInterval newm model)]
-        TSENewRestTime newm -> [Model (set restInterval newm model)]
+        TSENewWorkTime newm -> [Report ep, Model (set workInterval newm model)]
+        TSENewRestTime newm -> [Report ep, Model (set restInterval newm model)]
 
 buildUI ::
     WidgetEnv TimerSetting TimerSettingEvent ->

@@ -50,7 +50,7 @@ handleEvent wenv _node model evt =
                            ]
              in case view currentState model of
                     WorkWait _ -> []
-                    RestWait _ -> effect
+                    RestWait _ -> Event AppStopTimer : effect
                     NoWait -> effect
         AppStartRestTimer ->
             let ws = view (timerSettings . Settings.restInterval) model

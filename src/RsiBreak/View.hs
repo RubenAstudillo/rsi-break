@@ -21,7 +21,7 @@ buildUI _wenv model =
         [ label "Rsi Break!"
         , textField_ currentCountdown [readOnly] `nodeKey` mainCounter `styleBasic` currentCountdownColor
         , spacer
-        , composite "settings-param" timerSettings Settings.buildUI Settings.handleEvent
+        , composite "settings-param" timerSettings Settings.buildUI (Settings.handleEvent AppStopTimer)
         , spacer
         , button "Start" AppStartWorkTime
         , button "Stop" AppStopTimer
