@@ -23,4 +23,4 @@ realMain = do
         , appTheme darkTheme
         , appFontDef "Regular" roboto
         ]
-    model = AppModel (Settings.TimerSetting 30 5) "0:00" NoWait
+    model = AppModel (Settings.TimerSetting 20 10) "0:00" NoWait
