@@ -1,24 +1,27 @@
-{-# Language StrictData #-}
+{-# LANGUAGE StrictData #-}
+
 module RsiBreak.Widget.Timer where
 
 import Control.Concurrent.Async (Async, cancel)
+import Data.Functor (void)
+import Data.Maybe (maybeToList)
 import Monomer
-import RsiBreak.Widget.Settings (TimerSetting(..))
+import RsiBreak.Widget.Settings (TimerSetting (..))
+import System.Process (runInteractiveProcess, waitForProcess)
 
 data TimerEvent
-  = TimerStartWorkTime
-  | TimerStartRestTime
-  | TimerStop
-  | TimerStateUpdate TimerState
+    = TimerStartWorkTime
+    | TimerStartRestTime
+    | TimerStop
+    | TimerStateUpdate TimerState
 
 data TimerState
-  = TimerWorkWait (Async ())
-  | TimerRestWait (Async ())
-  | TimerNoWait
-  deriving (Eq)
+    = TimerWorkWait (Async ())
+    | TimerRestWait (Async ())
+    | TimerNoWait
+    deriving (Eq)
 
-data TimerModel
-  = TimerModel { tmSettings :: TimerSetting, tmState :: TimerState }
+data TimerModel = TimerModel {tmSettings :: TimerSetting, tmState :: TimerState}
 
 stopTimer :: TimerState -> IO ()
 stopTimer (TimerWorkWait t) = cancel t
@@ -32,6 +35,12 @@ handleEvent ::
     TimerEvent ->
     [AppEventResponse TimerModel TimerEvent]
 handleEvent wenv _node model evt =
-  case evt of
-    TimerStateUpdate wstate -> [Model (model { tmState = wstate })]
-    _ -> undefined
+    case evt of
+        TimerStateUpdate wstate -> [Model (model{tmState = wstate})]
+        TimerStop -> [Task (TimerStateUpdate TimerNoWait <$ stopTimer (tmState model))]
+        _ -> undefined
+
+popWin :: Maybe String -> IO ()
+popWin mstr = do
+    (_, _, _, than) <- runInteractiveProcess "rsi-break-popup" (maybeToList mstr) Nothing Nothing
+    void $ waitForProcess than
