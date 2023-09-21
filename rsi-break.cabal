@@ -36,6 +36,8 @@ library
                       RsiBreak.Sound
                       RsiBreak.RealMain
                       RsiBreak.Settings
+                      RsiBreak.Widget.Settings
+                      RsiBreak.Model.Minutes
     other-modules:    Paths_rsi_break
     -- other-extensions:
     build-depends:    base ^>=4.16.4.0,
