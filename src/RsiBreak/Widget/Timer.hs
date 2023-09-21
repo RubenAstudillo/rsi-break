@@ -5,6 +5,7 @@ module RsiBreak.Widget.Timer where
 import Control.Concurrent.Async (Async, cancel)
 import Data.Functor (void)
 import Data.Maybe (maybeToList)
+import Data.Time (NominalDiffTime)
 import Monomer
 import RsiBreak.Widget.Settings (TimerSetting (..))
 import System.Process (runInteractiveProcess, waitForProcess)
@@ -14,6 +15,7 @@ data TimerEvent
     | TimerStartRestTime
     | TimerStop
     | TimerStateUpdate TimerState
+    | TimerReport NominalDiffTime
 
 data TimerState
     = TimerWorkWait (Async ())
@@ -29,18 +31,25 @@ stopTimer (TimerRestWait t) = cancel t
 stopTimer _ = return ()
 
 handleEvent ::
+    (NominalDiffTime -> ep) ->
     WidgetEnv TimerModel TimerEvent ->
     WidgetNode TimerModel TimerEvent ->
     TimerModel ->
     TimerEvent ->
-    [AppEventResponse TimerModel TimerEvent]
-handleEvent wenv _node model evt =
+    [EventResponse TimerModel TimerEvent sp ep]
+handleEvent toEp wenv _node model evt =
     case evt of
         TimerStateUpdate wstate -> [Model (model{tmState = wstate})]
-        TimerStop -> [Task (TimerStateUpdate TimerNoWait <$ stopTimer (tmState model))]
+        TimerReport timediff -> [Report (toEp timediff)]
+        TimerStop ->
+            [ Task (TimerStateUpdate TimerNoWait <$ stopTimer (tmState model))
+            , Event (TimerReport 0)
+            ]
         _ -> undefined
 
 popWin :: Maybe String -> IO ()
 popWin mstr = do
     (_, _, _, than) <- runInteractiveProcess "rsi-break-popup" (maybeToList mstr) Nothing Nothing
     void $ waitForProcess than
+
+-- waitTime :: NominalDiffTime ->
