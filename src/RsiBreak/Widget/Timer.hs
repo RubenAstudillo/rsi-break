@@ -1,4 +1,5 @@
 {-# LANGUAGE NumericUnderscores #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
 module RsiBreak.Widget.Timer where
@@ -46,7 +47,7 @@ handleEvent ::
     TimerModel ->
     TimerEvent ->
     [EventResponse TimerModel TimerEvent sp ep]
-handleEvent toEp wenv _node model@(TimerModel settings timer) evt =
+handleEvent toEp _wenv _node model@(TimerModel settings timer) evt =
     case evt of
         TimerStateUpdate wstate -> [Model (model{tmState = wstate})]
         TimerReport timediff -> [Report (toEp timediff)]
@@ -58,6 +59,13 @@ handleEvent toEp wenv _node model@(TimerModel settings timer) evt =
             fmap (responseIf . not . isWorkTime $ timer) [Event TimerStop, Producer (waitWork settings)]
         TimerStartRestTime ->
             [Producer (waitRest settings)]
+
+buildUI :: WidgetEnv TimerModel TimerEvent -> TimerModel -> WidgetNode TimerModel TimerEvent
+buildUI _wenv _model =
+    vstack
+        [ button "Start" TimerStartWorkTime
+        , button "Stop" TimerStop
+        ]
 
 popWin :: Maybe String -> IO ()
 popWin mstr = do
