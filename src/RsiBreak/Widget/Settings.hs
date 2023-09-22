@@ -1,10 +1,10 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module RsiBreak.Widget.Settings
-  ( TimerSetting(..)
-  , handleEvent
-  , buildUI
-  ) where
+module RsiBreak.Widget.Settings (
+    TimerSetting (..),
+    handleEvent,
+    buildUI,
+) where
 
 import Control.Lens (makeLenses, set)
 import Monomer
@@ -18,9 +18,7 @@ data TimerSetting = TimerSetting
 
 $(makeLenses 'TimerSetting)
 
-data TimerSettingEvent
-    = TSENewWorkTime Minutes
-    | TSENewRestTime Minutes
+data TimerSettingEvent = TSENewWorkTime Minutes | TSENewRestTime Minutes
     deriving (Eq, Show)
 
 handleEvent ::

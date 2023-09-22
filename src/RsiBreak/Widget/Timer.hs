@@ -1,7 +1,13 @@
 {-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module RsiBreak.Widget.Timer where
+module RsiBreak.Widget.Timer (
+    TimerModel(..),
+    TimerState (..),
+    TimerEvent (..),
+    handleEvent,
+    buildUI,
+) where
 
 import Control.Concurrent (threadDelay)
 import Control.Concurrent.Async
