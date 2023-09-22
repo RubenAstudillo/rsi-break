@@ -30,7 +30,7 @@ data TimerState
     deriving (Eq)
 
 data TimerModel = TimerModel {tmSettings :: TimerSetting, tmState :: TimerState}
-  deriving (Eq)
+    deriving (Eq)
 
 stopTimer :: TimerState -> IO ()
 stopTimer (TimerWorkWait t) = cancel t

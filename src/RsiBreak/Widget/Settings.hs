@@ -5,13 +5,11 @@
 
 module RsiBreak.Widget.Settings
   ( TimerSetting(..)
-  , SettingsProps(..)
   , handleEvent
   , buildUI
   ) where
 
 import Control.Lens (makeLenses, set)
-import Data.Typeable (Typeable)
 import Monomer
 import RsiBreak.Model.Minutes (Minutes)
 
@@ -28,24 +26,18 @@ data TimerSettingEvent
     | TSENewRestTime Minutes
     deriving (Eq, Show)
 
-data SettingsProps where
-    CancelTimersOn :: Typeable i => i -> WidgetKey -> SettingsProps
-
-propToMessage :: SettingsProps -> EventResponse s e sp ep
-propToMessage (CancelTimersOn ev key) = Message key ev
-
 handleEvent ::
-    SettingsProps ->
+    ep ->
     WidgetEnv TimerSetting TimerSettingEvent ->
     WidgetNode TimerSetting TimerSettingEvent ->
     TimerSetting ->
     TimerSettingEvent ->
     [EventResponse TimerSetting TimerSettingEvent sp ep]
-handleEvent prop _wenv _node model evt =
+handleEvent onChangeEvent _wenv _node model evt =
     let changeModel = case evt of
             TSENewWorkTime newm -> Model (set workInterval newm model)
             TSENewRestTime newm -> Model (set restInterval newm model)
-     in [changeModel, propToMessage prop]
+     in [changeModel, Report onChangeEvent]
 
 buildUI ::
     WidgetEnv TimerSetting TimerSettingEvent ->
