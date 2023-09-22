@@ -30,12 +30,7 @@ common warnings
 
 library
     import:           warnings
-    exposed-modules:  RsiBreak.Controller
-                      RsiBreak.Model
-                      RsiBreak.View
-                      RsiBreak.Sound
-                      RsiBreak.RealMain
-                      RsiBreak.Settings
+    exposed-modules:  RsiBreak.RealMain
                       RsiBreak.Widget.Settings
                       RsiBreak.Widget.Timer
                       RsiBreak.Widget.Clockdown
