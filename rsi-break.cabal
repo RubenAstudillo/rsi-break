@@ -75,6 +75,7 @@ executable rsi-break-popup
     -- other-extensions:
     build-depends:
         base ^>=4.16.4.0,
+        process,
         monomer
     hs-source-dirs:   popup
     default-language: Haskell2010
