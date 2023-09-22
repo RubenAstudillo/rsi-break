@@ -50,7 +50,9 @@ buildUI _wenv (ClockModel _clock timer _) =
 handleEvent :: WidgetEnv ClockModel ClockEvent -> WidgetNode ClockModel ClockEvent -> ClockModel -> ClockEvent -> [AppEventResponse ClockModel ClockEvent]
 handleEvent _wenv _node model (ClockUpdate td) =
     let tdText = fromString (formatTime defaultTimeLocale "%m:%02S" td)
-     in [Model (model{_cmClock = tdText})]
+     in [ Model (model{_cmClock = tdText})
+        , Request RenderOnce
+        ]
 
 countdownStyle :: TimerState -> StyleState
 countdownStyle settings = case settings of
