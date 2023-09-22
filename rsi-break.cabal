@@ -41,6 +41,8 @@ library
                       RsiBreak.Widget.Clockdown
                       RsiBreak.Model.Minutes
     other-modules:    Paths_rsi_break
+    default-extensions: StrictData
+                        OverloadedStrings
     -- other-extensions:
     build-depends:    base ^>=4.16.4.0,
                       monomer,

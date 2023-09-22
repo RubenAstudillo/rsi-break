@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE StrictData #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module RsiBreak.Widget.Clockdown where
@@ -63,8 +61,8 @@ handleEvent _wenv _node _model ClockCancelTimer =
 
 countdownStyle :: TimerState -> StyleState
 countdownStyle settings = case settings of
-    TimerWorkWait _ -> blueBgStyle
-    TimerRestWait _ -> greenBgStyle
+    TimerWorkWait _ -> greenBgStyle
+    TimerRestWait _ -> blueBgStyle
     _ -> mempty
 
 toTimerModel :: ALens' ClockModel TimerModel

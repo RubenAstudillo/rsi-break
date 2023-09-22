@@ -1,15 +1,13 @@
 {-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE StrictData #-}
 
 module RsiBreak.Widget.Timer where
 
 import Control.Concurrent (threadDelay)
-import Control.Concurrent.Async (Async, async, cancel, waitCatch)
+import Control.Concurrent.Async
 import Control.Monad (when)
 import Data.Either (isRight)
 import Data.Functor (void)
-import Data.Maybe (maybeToList)
 import Data.Time (NominalDiffTime, diffUTCTime, getCurrentTime)
 import Monomer
 import RsiBreak.Model.Minutes (toTimeDiff)
@@ -68,9 +66,9 @@ buildUI _wenv _model =
         , button "Stop" TimerStop
         ]
 
-popWin :: Maybe String -> IO ()
-popWin mstr = do
-    (_, _, _, than) <- runInteractiveProcess "rsi-break-popup" (maybeToList mstr) Nothing Nothing
+popWin :: String -> IO ()
+popWin str = do
+    (_, _, _, than) <- runInteractiveProcess "rsi-break-popup" (pure str) Nothing Nothing
     void $ waitForProcess than
 
 waitTime :: NominalDiffTime -> ProducerHandler TimerEvent
@@ -87,17 +85,21 @@ waitTime totalTime handle = getCurrentTime >>= go
             else handle (TimerReport 0)
 
 waitWork :: TimerSetting -> ProducerHandler TimerEvent
-waitWork ts handle = do
-    let totalTime = toTimeDiff (_workInterval ts)
-    waitThread <- async (waitTime totalTime handle)
-    handle (TimerStateUpdate (TimerWorkWait waitThread))
-    res <- waitCatch waitThread
-    when (isRight res) (handle TimerStartRestTime)
+waitWork ts handle =
+    withAsync (waitTime totalTime handle) $ \waitThr ->
+        withAsync (popWin "Working Time!") $ \_popThr -> do
+            handle (TimerStateUpdate (TimerWorkWait waitThr))
+            res <- waitCatch waitThr
+            when (isRight res) (handle TimerStartRestTime)
+  where
+    totalTime = toTimeDiff (_workInterval ts)
 
 waitRest :: TimerSetting -> ProducerHandler TimerEvent
-waitRest ts handle = do
-    let totalTime = toTimeDiff (_restInterval ts)
-    waitThread <- async (waitTime totalTime handle)
-    handle (TimerStateUpdate (TimerRestWait waitThread))
-    res <- waitCatch waitThread
-    when (isRight res) (handle TimerStartWorkTime)
+waitRest ts handle =
+    withAsync (waitTime totalTime handle) $ \waitThr ->
+        withAsync (popWin "Resting Time!") $ \_popThr -> do
+            handle (TimerStateUpdate (TimerRestWait waitThr))
+            res <- waitCatch waitThr
+            when (isRight res) (handle TimerStartWorkTime)
+  where
+    totalTime = toTimeDiff (_restInterval ts)
