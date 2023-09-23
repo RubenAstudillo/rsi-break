@@ -45,7 +45,7 @@ buildUI _wenv (ClockModel _ timer _) =
         , composite "settings-parameters" cmSettings Settings.buildUI (Settings.handleEvent ClockCancelTimer)
         , spacer
         , composite "timer" toTimerModel Timer.buildUI (Timer.handleEvent ClockUpdate) `nodeKey` mainCounter
-        ]
+        ] `styleBasic` [padding 10]
 
 handleEvent ::
     WidgetEnv ClockModel ClockEvent ->
