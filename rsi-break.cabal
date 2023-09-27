@@ -30,13 +30,14 @@ common warnings
 
 library
     import:           warnings
-    exposed-modules:  RsiBreak.Controller
-                      RsiBreak.Model
-                      RsiBreak.View
-                      RsiBreak.Sound
-                      RsiBreak.RealMain
-                      RsiBreak.Settings
+    exposed-modules:  RsiBreak.RealMain
+                      RsiBreak.Widget.Settings
+                      RsiBreak.Widget.Timer
+                      RsiBreak.Widget.Clockdown
+                      RsiBreak.Model.Minutes
     other-modules:    Paths_rsi_break
+    default-extensions: StrictData
+                        OverloadedStrings
     -- other-extensions:
     build-depends:    base ^>=4.16.4.0,
                       monomer,
@@ -69,6 +70,7 @@ executable rsi-break-popup
     -- other-extensions:
     build-depends:
         base ^>=4.16.4.0,
+        process,
         monomer
     hs-source-dirs:   popup
     default-language: Haskell2010
