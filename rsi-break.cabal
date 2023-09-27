@@ -46,7 +46,9 @@ library
                       text-show,
                       async,
                       time,
-                      process
+                      process,
+                      config-ini,
+                      xdg-basedir
     hs-source-dirs:   src
     default-language: Haskell2010
 
