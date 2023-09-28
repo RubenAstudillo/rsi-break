@@ -79,7 +79,7 @@ waitTime totalTime handle = getCurrentTime >>= go
         let timeDiff = diffUTCTime currentTime startTime
         if timeDiff <= totalTime
             then do
-                handle (TimerReport (totalTime - timeDiff))
+                handle $! (TimerReport (totalTime - timeDiff))
                 threadDelay 500_000
                 go startTime
             else handle (TimerReport 0)

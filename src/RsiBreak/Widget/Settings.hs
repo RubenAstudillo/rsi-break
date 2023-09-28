@@ -1,32 +1,28 @@
-{-# LANGUAGE TemplateHaskell #-}
-
 module RsiBreak.Widget.Settings (
     TimerSetting (..),
     handleEvent,
     buildUI,
 ) where
 
-import Control.Lens (makeLenses, set)
+import Control.Applicative (Alternative (empty))
+import Control.Lens (set)
 import Monomer
+import RsiBreak.Actions (storeSettingsOnConfigFile)
 import RsiBreak.Model.Minutes (Minutes)
-
-data TimerSetting = TimerSetting
-    { _workInterval :: Minutes
-    , _restInterval :: Minutes
-    }
-    deriving (Eq, Show)
-
-$(makeLenses 'TimerSetting)
+import RsiBreak.Model.Settings
 
 data TimerSettingEvent = TSENewWorkTime Minutes | TSENewRestTime Minutes
     deriving (Eq, Show)
 
 handleEvent :: ep -> EventHandler TimerSetting TimerSettingEvent sp ep
 handleEvent onChangeEvent _wenv _node model evt =
-    let changeModel = case evt of
-            TSENewWorkTime newm -> Model (set workInterval newm model)
-            TSENewRestTime newm -> Model (set restInterval newm model)
-     in [changeModel, Report onChangeEvent]
+    let newModel = case evt of
+            TSENewWorkTime newm -> set workInterval newm model
+            TSENewRestTime newm -> set restInterval newm model
+     in [ Model newModel
+        , Report onChangeEvent
+        , Task (storeSettingsOnConfigFile newModel *> empty)
+        ]
 
 buildUI :: UIBuilder TimerSetting TimerSettingEvent
 buildUI _wenv _model =

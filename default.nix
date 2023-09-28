@@ -1,5 +1,5 @@
-{ mkDerivation, async, base, config-ini, lens, lib, monomer
-, process, text, text-show, time, xdg-basedir
+{ mkDerivation, async, base, config-ini, directory, filepath, lens
+, lib, monomer, process, text, text-show, time
 }:
 mkDerivation {
   pname = "rsi-break";
@@ -9,8 +9,8 @@ mkDerivation {
   isExecutable = true;
   enableSeparateDataOutput = true;
   libraryHaskellDepends = [
-    async base config-ini lens monomer process text text-show time
-    xdg-basedir
+    async base config-ini directory filepath lens monomer process text
+    text-show time
   ];
   executableHaskellDepends = [ base monomer process ];
   testHaskellDepends = [ base ];
