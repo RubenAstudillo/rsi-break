@@ -45,13 +45,7 @@ isWorkTime :: TimerState -> Bool
 isWorkTime (TimerWorkWait _) = True
 isWorkTime _ = False
 
-handleEvent ::
-    (NominalDiffTime -> ep) ->
-    WidgetEnv TimerModel TimerEvent ->
-    WidgetNode TimerModel TimerEvent ->
-    TimerModel ->
-    TimerEvent ->
-    [EventResponse TimerModel TimerEvent sp ep]
+handleEvent :: (NominalDiffTime -> ep) -> EventHandler TimerModel TimerEvent es ep
 handleEvent toEp _wenv _node model@(TimerModel settings timer) evt =
     case evt of
         TimerStateUpdate wstate -> [Model (model{tmState = wstate})]
@@ -65,7 +59,7 @@ handleEvent toEp _wenv _node model@(TimerModel settings timer) evt =
         TimerStartRestTime ->
             [Producer (waitRest settings)]
 
-buildUI :: WidgetEnv TimerModel TimerEvent -> TimerModel -> WidgetNode TimerModel TimerEvent
+buildUI :: UIBuilder TimerModel TimerEvent
 buildUI _wenv _model =
     vstack
         [ button "Start" TimerStartWorkTime

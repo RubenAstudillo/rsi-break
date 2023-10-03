@@ -21,23 +21,14 @@ $(makeLenses 'TimerSetting)
 data TimerSettingEvent = TSENewWorkTime Minutes | TSENewRestTime Minutes
     deriving (Eq, Show)
 
-handleEvent ::
-    ep ->
-    WidgetEnv TimerSetting TimerSettingEvent ->
-    WidgetNode TimerSetting TimerSettingEvent ->
-    TimerSetting ->
-    TimerSettingEvent ->
-    [EventResponse TimerSetting TimerSettingEvent sp ep]
+handleEvent :: ep -> EventHandler TimerSetting TimerSettingEvent sp ep
 handleEvent onChangeEvent _wenv _node model evt =
     let changeModel = case evt of
             TSENewWorkTime newm -> Model (set workInterval newm model)
             TSENewRestTime newm -> Model (set restInterval newm model)
      in [changeModel, Report onChangeEvent]
 
-buildUI ::
-    WidgetEnv TimerSetting TimerSettingEvent ->
-    TimerSetting ->
-    WidgetNode TimerSetting TimerSettingEvent
+buildUI :: UIBuilder TimerSetting TimerSettingEvent
 buildUI _wenv _model =
     vstack
         [ hstack

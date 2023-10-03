@@ -36,7 +36,7 @@ mainCounter = "MainCounter"
 mainCounterKey :: WidgetKey
 mainCounterKey = WidgetKey mainCounter
 
-buildUI :: WidgetEnv ClockModel ClockEvent -> ClockModel -> WidgetNode ClockModel ClockEvent
+buildUI :: UIBuilder ClockModel ClockEvent
 buildUI _wenv (ClockModel _ timer _) =
     vstack
         [ label "Rsi break!"
@@ -47,12 +47,7 @@ buildUI _wenv (ClockModel _ timer _) =
         , composite "timer" toTimerModel Timer.buildUI (Timer.handleEvent ClockUpdate) `nodeKey` mainCounter
         ] `styleBasic` [padding 10]
 
-handleEvent ::
-    WidgetEnv ClockModel ClockEvent ->
-    WidgetNode ClockModel ClockEvent ->
-    ClockModel ->
-    ClockEvent ->
-    [AppEventResponse ClockModel ClockEvent]
+handleEvent :: EventHandler ClockModel ClockEvent es ep
 handleEvent _wenv _node model (ClockUpdate td) =
     let tdText = fromString (formatTime defaultTimeLocale "%m:%02S" td)
      in [Model (model{_cmClock = tdText}), Request RenderOnce]
