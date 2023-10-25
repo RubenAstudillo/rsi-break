@@ -68,15 +68,18 @@ handleEvent toEp _wenv _node model@(TimerModel settings timer) evt =
             [ Task (TimerStateUpdate TimerNoWait <$ stopTimer timer)
             , Event (TimerReport 0)
             ]
-        TimerStartWorkTime ->
-            fmap (responseIf . not . isWorkTime $ timer) [Event TimerStop, Producer (waitWork settings)]
-        TimerStartRestTime ->
-            [Producer (waitRest settings)]
+        TimerStartWorkTime
+            | isWorkTime timer -> [] -- no relaunch
+            | otherwise -> [Event TimerStop, Producer (waitWork settings)]
+        TimerStartRestTime
+            | isWorkTime timer -> [Event TimerStop, Producer (waitRest settings)]
+            | otherwise -> [] -- Do not jump to rest if the timer is stopped.
 
 buildUI :: UIBuilder TimerModel TimerEvent
 buildUI _wenv _model =
     vstack
         [ button "Start" TimerStartWorkTime
+        , button "Finish just this cycle" TimerStartRestTime
         , button "Stop" TimerStop
         ]
 
