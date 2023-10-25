@@ -1,42 +1,48 @@
-{-# LANGUAGE TemplateHaskell #-}
+{- |
+Module      : RsiBreak.Widget.Settings
+Copyright   : (c) Ruben Astudillo, 2023
+License     : BSD-2
+Maintainer  : ruben.astud@gmail.com
 
+Composite for setting values and their modifications.
+-}
 module RsiBreak.Widget.Settings (
-    TimerSetting (..),
     handleEvent,
     buildUI,
 ) where
 
-import Control.Lens (makeLenses, set)
+import Control.Lens (set)
 import Monomer
+import RsiBreak.Actions (storeSettingsOnConfigFile)
 import RsiBreak.Model.Minutes (Minutes)
+import RsiBreak.Model.Settings (TimerSetting (..), restInterval, workInterval)
 
-data TimerSetting = TimerSetting
-    { _workInterval :: Minutes
-    , _restInterval :: Minutes
-    }
+data TimerChange = TSENewWorkTime Minutes | TSENewRestTime Minutes
     deriving (Eq, Show)
 
-$(makeLenses 'TimerSetting)
-
-data TimerSettingEvent = TSENewWorkTime Minutes | TSENewRestTime Minutes
+data TimerSettingEvent = TimerChangeEvent TimerChange | TSENoOp
     deriving (Eq, Show)
 
 handleEvent :: ep -> EventHandler TimerSetting TimerSettingEvent sp ep
-handleEvent onChangeEvent _wenv _node model evt =
-    let changeModel = case evt of
-            TSENewWorkTime newm -> Model (set workInterval newm model)
-            TSENewRestTime newm -> Model (set restInterval newm model)
-     in [changeModel, Report onChangeEvent]
+handleEvent _onChangeEvent _wenv _node _model TSENoOp = []
+handleEvent onChangeEvent _wenv _node model (TimerChangeEvent evt) =
+    let newModel = case evt of
+            TSENewWorkTime newm -> set workInterval newm model
+            TSENewRestTime newm -> set restInterval newm model
+     in [ Model newModel
+        , Report onChangeEvent
+        , Task (TSENoOp <$ storeSettingsOnConfigFile newModel)
+        ]
 
 buildUI :: UIBuilder TimerSetting TimerSettingEvent
 buildUI _wenv _model =
     vstack
         [ hstack
             [ label "Work time: "
-            , numericField_ workInterval [minValue 0, maxValue 300, onChange TSENewWorkTime]
+            , numericField_ workInterval [minValue 0, maxValue 300, onChange (TimerChangeEvent . TSENewWorkTime)]
             ]
         , hstack
             [ label "Rest time: "
-            , numericField_ restInterval [minValue 0, maxValue 300, onChange TSENewRestTime]
+            , numericField_ restInterval [minValue 0, maxValue 300, onChange (TimerChangeEvent . TSENewRestTime)]
             ]
         ]

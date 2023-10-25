@@ -35,9 +35,12 @@ library
                       RsiBreak.Widget.Timer
                       RsiBreak.Widget.Clockdown
                       RsiBreak.Model.Minutes
+                      RsiBreak.Model.Settings
+                      RsiBreak.Actions
     other-modules:    Paths_rsi_break
     default-extensions: StrictData
                         OverloadedStrings
+                        ImportQualifiedPost
     -- other-extensions:
     build-depends:    base >= 4.16.4.0 && < 4.18,
                       monomer,
@@ -46,7 +49,10 @@ library
                       text-show,
                       async,
                       time,
-                      process
+                      process,
+                      config-ini,
+                      directory,
+                      filepath
     hs-source-dirs:   src
     default-language: Haskell2010
 

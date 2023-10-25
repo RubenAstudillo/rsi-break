@@ -5,12 +5,14 @@ module RsiBreak.RealMain (realMain) where
 import Data.String (IsString (..))
 import Monomer
 import Paths_rsi_break
-import qualified RsiBreak.Widget.Clockdown as Clockdown
-import qualified RsiBreak.Widget.Settings as Settings
-import qualified RsiBreak.Widget.Timer as Timer
+import RsiBreak.Actions (getOrCreateConfigFile)
+import RsiBreak.Widget.Clockdown qualified as Clockdown
+import RsiBreak.Widget.Timer qualified as Timer
 
 realMain :: IO ()
 realMain = do
+    timerSettings <- getOrCreateConfigFile
+    let model = Clockdown.ClockModel "0:00" Timer.TimerNoWait timerSettings
     windowIconPath <- fromString <$> getDataFileName "assets/images/icon.png"
     robotoRegularFont <- fromString <$> getDataFileName "assets/fonts/Roboto-Regular.ttf"
     let cfg = config windowIconPath robotoRegularFont
@@ -22,4 +24,3 @@ realMain = do
         , appTheme darkTheme
         , appFontDef "Regular" roboto
         ]
-    model = Clockdown.ClockModel "0:00" Timer.TimerNoWait (Settings.TimerSetting 20 10)

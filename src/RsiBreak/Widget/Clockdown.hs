@@ -1,5 +1,14 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE BangPatterns #-}
 
+{- |
+Module      : RsiBreak.Widget.Clockdown
+Copyright   : (c) Ruben Astudillo, 2023
+License     : BSD-2
+Maintainer  : ruben.astud@gmail.com
+
+Main composite of the the application.
+-}
 module RsiBreak.Widget.Clockdown (
     ClockModel (ClockModel),
     handleEvent,
@@ -8,12 +17,12 @@ module RsiBreak.Widget.Clockdown (
 
 import Control.Lens (ALens', lens, makeLensesFor)
 import Data.String (IsString (fromString))
-import Data.Text
+import Data.Text (Text)
 import Data.Time (NominalDiffTime, defaultTimeLocale, formatTime)
 import Monomer
-import qualified RsiBreak.Widget.Settings as Settings
-import RsiBreak.Widget.Timer (TimerModel (..), TimerState (..))
-import qualified RsiBreak.Widget.Timer as Timer
+import RsiBreak.Widget.Settings qualified as Settings
+import RsiBreak.Model.Settings qualified as Settings
+import RsiBreak.Widget.Timer qualified as Timer
 
 greenBgStyle, blueBgStyle :: StyleState
 greenBgStyle = mempty{_sstBgColor = Just (Color 0 128 0 1)}
@@ -21,7 +30,7 @@ blueBgStyle = mempty{_sstBgColor = Just (Color 0 0 128 1)}
 
 data ClockModel = ClockModel
     { _cmClock :: Text
-    , _cmTimer :: TimerState
+    , _cmTimer :: Timer.TimerState
     , _cmSettings :: Settings.TimerSetting
     }
     deriving (Eq)
@@ -45,22 +54,27 @@ buildUI _wenv (ClockModel _ timer _) =
         , composite "settings-parameters" cmSettings Settings.buildUI (Settings.handleEvent ClockCancelTimer)
         , spacer
         , composite "timer" toTimerModel Timer.buildUI (Timer.handleEvent ClockUpdate) `nodeKey` mainCounter
-        ] `styleBasic` [padding 10]
+        ]
+        `styleBasic` [padding 10]
 
 handleEvent :: EventHandler ClockModel ClockEvent es ep
 handleEvent _wenv _node model (ClockUpdate td) =
-    let tdText = fromString (formatTime defaultTimeLocale "%m:%02S" td)
+    let !tdText = fromString (formatTime defaultTimeLocale "%m:%02S" td)
      in [Model (model{_cmClock = tdText}), Request RenderOnce]
 handleEvent _ _ _ ClockCancelTimer = [Message mainCounterKey Timer.TimerStop]
 
-countdownStyle :: TimerState -> StyleState
+countdownStyle :: Timer.TimerState -> StyleState
 countdownStyle settings = case settings of
-    TimerWorkWait _ -> greenBgStyle
-    TimerRestWait _ -> blueBgStyle
+    Timer.TimerWorkWait _ -> greenBgStyle
+    Timer.TimerRestWait _ -> blueBgStyle
     _ -> mempty
 
-toTimerModel :: ALens' ClockModel TimerModel
+toTimerModel :: ALens' ClockModel Timer.TimerModel
 toTimerModel = lens getter setter
   where
-    getter clock = TimerModel (_cmSettings clock) (_cmTimer clock)
-    setter clock timer = clock{_cmTimer = tmState timer, _cmSettings = tmSettings timer}
+    getter clock = Timer.TimerModel (_cmSettings clock) (_cmTimer clock)
+    setter clock timer =
+        clock
+            { _cmTimer = Timer.tmState timer
+            , _cmSettings = Timer.tmSettings timer
+            }

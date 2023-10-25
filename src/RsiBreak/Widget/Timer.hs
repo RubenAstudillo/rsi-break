@@ -1,10 +1,18 @@
 {-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+{- |
+Module      : RsiBreak.Widget.Timer
+Copyright   : (c) Ruben Astudillo, 2023
+License     : BSD-2
+Maintainer  : ruben.astud@gmail.com
+
+Composite holding the threads with the time counter.
+-}
 module RsiBreak.Widget.Timer (
-    TimerModel(..),
+    TimerModel (..),
     TimerState (..),
-    TimerEvent (..),
+    TimerEvent (TimerStop),
     handleEvent,
     buildUI,
 ) where
@@ -17,7 +25,7 @@ import Data.Functor (void)
 import Data.Time (NominalDiffTime, diffUTCTime, getCurrentTime)
 import Monomer
 import RsiBreak.Model.Minutes (toTimeDiff)
-import RsiBreak.Widget.Settings (TimerSetting (..))
+import RsiBreak.Model.Settings qualified as Settings (TimerSetting (..))
 import System.Process (runInteractiveProcess, waitForProcess)
 
 data TimerEvent
@@ -27,13 +35,21 @@ data TimerEvent
     | TimerStateUpdate TimerState
     | TimerReport NominalDiffTime
 
+-- | State data type that will be read and __written__ by this composite.
 data TimerState
     = TimerWorkWait (Async ())
     | TimerRestWait (Async ())
     | TimerNoWait
     deriving (Eq)
 
-data TimerModel = TimerModel {tmSettings :: TimerSetting, tmState :: TimerState}
+{- | State data type that holds a read-only reference to
+     @Settings.TimerSetting@. We will read such reference when launching a
+     timer.
+-}
+data TimerModel = TimerModel
+    { tmSettings :: Settings.TimerSetting
+    , tmState :: TimerState
+    }
     deriving (Eq)
 
 stopTimer :: TimerState -> IO ()
@@ -45,7 +61,10 @@ isWorkTime :: TimerState -> Bool
 isWorkTime (TimerWorkWait _) = True
 isWorkTime _ = False
 
-handleEvent :: (NominalDiffTime -> ep) -> EventHandler TimerModel TimerEvent es ep
+handleEvent ::
+    -- | Wrapper for event to report on parent composite
+    (NominalDiffTime -> ep) ->
+    EventHandler TimerModel TimerEvent es ep
 handleEvent toEp _wenv _node model@(TimerModel settings timer) evt =
     case evt of
         TimerStateUpdate wstate -> [Model (model{tmState = wstate})]
@@ -54,15 +73,18 @@ handleEvent toEp _wenv _node model@(TimerModel settings timer) evt =
             [ Task (TimerStateUpdate TimerNoWait <$ stopTimer timer)
             , Event (TimerReport 0)
             ]
-        TimerStartWorkTime ->
-            fmap (responseIf . not . isWorkTime $ timer) [Event TimerStop, Producer (waitWork settings)]
-        TimerStartRestTime ->
-            [Producer (waitRest settings)]
+        TimerStartWorkTime
+            | isWorkTime timer -> [] -- no relaunch
+            | otherwise -> [Event TimerStop, Producer (waitWork settings)]
+        TimerStartRestTime
+            | isWorkTime timer -> [Event TimerStop, Producer (waitRest settings)]
+            | otherwise -> [] -- Do not jump to rest if the timer is stopped.
 
 buildUI :: UIBuilder TimerModel TimerEvent
 buildUI _wenv _model =
     vstack
         [ button "Start" TimerStartWorkTime
+        , button "Finish just this cycle" TimerStartRestTime
         , button "Stop" TimerStop
         ]
 
@@ -79,12 +101,12 @@ waitTime totalTime handle = getCurrentTime >>= go
         let timeDiff = diffUTCTime currentTime startTime
         if timeDiff <= totalTime
             then do
-                handle (TimerReport (totalTime - timeDiff))
+                handle $! TimerReport (totalTime - timeDiff)
                 threadDelay 500_000
                 go startTime
             else handle (TimerReport 0)
 
-waitWork :: TimerSetting -> ProducerHandler TimerEvent
+waitWork :: Settings.TimerSetting -> ProducerHandler TimerEvent
 waitWork ts handle =
     withAsync (waitTime totalTime handle) $ \waitThr ->
         withAsync (popWin "Working Time!") $ \_popThr -> do
@@ -92,9 +114,9 @@ waitWork ts handle =
             res <- waitCatch waitThr
             when (isRight res) (handle TimerStartRestTime)
   where
-    totalTime = toTimeDiff (_workInterval ts)
+    totalTime = toTimeDiff (Settings._workInterval ts)
 
-waitRest :: TimerSetting -> ProducerHandler TimerEvent
+waitRest :: Settings.TimerSetting -> ProducerHandler TimerEvent
 waitRest ts handle =
     withAsync (waitTime totalTime handle) $ \waitThr ->
         withAsync (popWin "Resting Time!") $ \_popThr -> do
@@ -102,4 +124,4 @@ waitRest ts handle =
             res <- waitCatch waitThr
             when (isRight res) (handle TimerStartWorkTime)
   where
-    totalTime = toTimeDiff (_restInterval ts)
+    totalTime = toTimeDiff (Settings._restInterval ts)
