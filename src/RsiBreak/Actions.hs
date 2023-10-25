@@ -1,3 +1,12 @@
+{- |
+Module      : RsiBreak.Actions
+Copyright   : (c) Ruben Astudillo, 2023
+License     : BSD-2
+Maintainer  : ruben.astud@gmail.com
+
+Actions to be run on change of values such as settings.
+-}
+
 module RsiBreak.Actions (getOrCreateConfigFile, storeSettingsOnConfigFile) where
 
 import Control.Monad (unless)

@@ -21,6 +21,7 @@ import Data.Text (Text)
 import Data.Time (NominalDiffTime, defaultTimeLocale, formatTime)
 import Monomer
 import RsiBreak.Widget.Settings qualified as Settings
+import RsiBreak.Model.Settings qualified as Settings
 import RsiBreak.Widget.Timer qualified as Timer
 
 greenBgStyle, blueBgStyle :: StyleState

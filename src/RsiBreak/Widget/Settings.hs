@@ -1,5 +1,12 @@
+{- |
+Module      : RsiBreak.Widget.Settings
+Copyright   : (c) Ruben Astudillo, 2023
+License     : BSD-2
+Maintainer  : ruben.astud@gmail.com
+
+Composite for setting values and their modifications.
+-}
 module RsiBreak.Widget.Settings (
-    TimerSetting (..),
     handleEvent,
     buildUI,
 ) where
@@ -8,7 +15,7 @@ import Control.Lens (set)
 import Monomer
 import RsiBreak.Actions (storeSettingsOnConfigFile)
 import RsiBreak.Model.Minutes (Minutes)
-import RsiBreak.Model.Settings
+import RsiBreak.Model.Settings (TimerSetting (..), restInterval, workInterval)
 
 data TimerChange = TSENewWorkTime Minutes | TSENewRestTime Minutes
     deriving (Eq, Show)
