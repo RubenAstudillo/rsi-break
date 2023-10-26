@@ -2,10 +2,20 @@ cabal-version:      3.0
 name:               rsi-break
 version:            0.1.0.0
 synopsis:           Let your mind know that your hands need a rest!
+description:
+  Quick pomodoro style timer so you hands get a rest interval.
+
+  * Health advice
+
+  This is a tool but not a cure. Physical therapy with an specialist can give
+  you a window of time where you are free of pain. Then exercise is the long
+  term solution. I am following this path, ask me in 3 years if it worked :-)
 license:            BSD-2-Clause
 license-file:       LICENSE
 author:             Ruben Astudillo
 maintainer:         ruben.astud@gmail.com
+homepage:           https://github.com/RubenAstudillo/rsi-break
+bug-reports:        https://github.com/RubenAstudillo/rsi-break/issues
 -- copyright:
 category:           Graphics
 build-type:         Simple
