@@ -36,6 +36,7 @@ library
                       RsiBreak.Model.Minutes
                       RsiBreak.Model.Settings
                       RsiBreak.Actions
+    autogen-modules:  Paths_rsi_break
     other-modules:    Paths_rsi_break
     default-extensions: StrictData
                         OverloadedStrings
